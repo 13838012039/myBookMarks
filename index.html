@@ -12,64 +12,176 @@
 <body>
     <header></header>
     <main>
+
         <div id="container"></div>
     </main>
     <footer></footer>
     <script>
-        var keys = {
-            0: ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
-            1: ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'],
-            2: ['z', 'x', 'c', 'v', 'b', 'n', 'm'],
-            length: 3
-        }
-        hash = {
-            'q': 'qq.com',
-            'w': 'qq.com',
-            'e': 'qq.com',
-            'r': 'qq.com',
-            't': 'qq.com',
-            'y': 'qq.com',
-            'u': 'qq.com',
-        }
-        hashInLocalStorage = JSON.parse(localStorage.getItem('zzz') || 'null');
-        if (hashInLocalStorage) {
-            hash = hashInLocalStorage;
+        // 初始化数据
+        var hashA = init();
+        var keys = hashA['keys'];
+        var hash = hashA['hash'];
+        //生成键盘
+        generatorKeyboard(keys, hash);
+
+        //监听用户动作
+        listenToKeyboard(hash);
+
+
+
+
+
+        function getFromLocalStorage(name) {
+            return JSON.parse(localStorage.getItem(name) || 'null');
         }
 
-        index = 0;
-        while (index < keys.length) {
-            rowDiv = document.createElement('div');
-            container.appendChild(rowDiv);
-            index2 = 0;
-            row = keys[index];
-            while (index2 < row.length) {
-                keyKbd = document.createElement('kbd');
-                keyKbd.textContent = row[index2];
+        function createTag(tagName, attributes) {
+            var element = document.createElement(tagName);
+            for (var key in attributes) {
+                element[key] = attributes[key];
+            }
+            return element;
+        }
 
-                keyButton = document.createElement('button');
-                keyButton.id = row[index2];
-                keyButton.textContent = "编辑";
+        function createSpan(textContent) {
+            var span = createTag('span', {
+                textContent: textContent,
+                className: 'text'
+            });
 
-                keyButton.onclick = function(aaaaa) {
-                    key = aaaaa['target']['id']
-                    x = prompt('给我一个地址');
-                    hash[key] = x;
-                    localStorage.setItem('zzz', JSON.stringify(hash));
+            return span;
+        }
+
+        function createButton(id) {
+            var keyButton = createTag('button', {
+                id: id,
+                textContent: '编辑'
+            });
+            keyButton.onclick = function(aaaaa) {
+                var button2 = aaaaa['target'];
+                var img2 = button2.previousSibling;
+                console.log(img2);
+                var key = button2['id'];
+
+                var x = prompt('给我一个地址');
+                hash[key] = x;
+                img2.src = 'http://' + x + '/favicon.ico';
+                img2.onerror = function(xxx) {
+                    xxx.target.src = 'http://' + 'hao123.com' + '/favicon.ico';
+                }
+                localStorage.setItem('zzz', JSON.stringify(hash));
+            }
+            return keyButton;
+        }
+
+        function createImg(domain) {
+            var iconImg = createTag('img');
+            if (domain) {
+                iconImg.src = 'http://' + domain + '/favicon.ico';
+
+            } else {
+                iconImg.src = 'http://' + 'hao123.com' + '/favicon.ico';
+            }
+            iconImg.onerror = function(xxx) {
+                console.log('下载失败了');
+                console.log(xxx);
+                xxx.target.src = 'http://' + 'hao123.com' + '/favicon.ico';
+            }
+            return iconImg;
+        }
+
+        function init() {
+            //1数据初始化
+            var keys = {
+                0: ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
+                1: ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'],
+                2: ['z', 'x', 'c', 'v', 'b', 'n', 'm'],
+                length: 3
+            }
+            var hash = {
+                'q': 'qq.com',
+                'w': 'qq.com',
+                'e': 'qq.com',
+                'r': 'qq.com',
+                't': 'qq.com',
+                'y': 'qq.com',
+                'u': 'qq.com',
+            }
+            hashInLocalStorage = getFromLocalStorage("zzz");
+            if (hashInLocalStorage) {
+                hash = hashInLocalStorage;
+                console.log("ss");
+            }
+
+            return {
+                'keys': keys,
+                'hash': hash
+            }
+        }
+
+        function generatorKeyboard(keys, hash) {
+            //2生成键盘
+
+            for (var index = 0; index < keys.length; index++) {
+
+
+
+                var rowDiv = createTag('div', {
+                    className: 'row'
+                });
+
+
+
+
+                container.appendChild(rowDiv);
+
+
+
+
+                var row = keys[index];
+                for (var index2 = 0; index2 < row.length; index2++) {
+
+
+
+                    var span = createSpan(row[index2]);
+
+
+
+
+                    var keyButton = createButton(row[index2]);
+
+
+
+                    var iconImg = createImg(hash[row[index2]]);
+
+
+
+                    var keyKbd = createTag('kbd', {
+                        className: 'key'
+                    });
+                    keyKbd.appendChild(span);
+                    keyKbd.appendChild(iconImg);
+                    keyKbd.appendChild(keyButton);
+
+
+
+                    rowDiv.appendChild(keyKbd);
 
 
                 }
-                rowDiv.appendChild(keyKbd);
-                keyKbd.appendChild(keyButton);
-                index2++;
+
+
             }
-            index++;
         }
 
-        document.onkeypress = function(bbbbb) {
-            key = bbbbb['key'];
-            website = hash[key];
-            console.log(website);
-            window.open("http://" + website, '_blank');
+        function listenToKeyboard(hash) {
+            //3监听键盘
+            document.onkeypress = function(bbbbb) {
+                var key = bbbbb['key'];
+                var website = hash[key];
+                console.log(website);
+                window.open("http://" + website, '_blank');
+            }
         }
     </script>
 </body>
